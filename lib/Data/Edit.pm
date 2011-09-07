@@ -40,6 +40,7 @@ sub edit_structure {
     do {
         my ($fh, $fn) = tempfile( SUFFIX => ".yml" );
         if (defined $last_error) {
+            print $fh "# The previous error was:\n";
             print $fh map { "# $_\n" } split(/\n/, $last_error);
         }
         print $fh map { "# $_\n" } split(/\n/, $name);
@@ -51,15 +52,19 @@ sub edit_structure {
         my $ed = find_editor();
         $ed->edit($fn);
 
+        open($fh, "<", $fn) or die $!;
+
         local $@;
         eval {
-            $out = Load($fn);
+            $out = Load(join("", <$fh>));
         };
-        unlink($fn) or warn "Could not delete '$fn': $!";
-
         $last_error = $@;
 
-    } while (defined $last_error);
+        close $fh;
+        unlink($fn) or warn "Could not delete '$fn': $!";
+
+
+    } while ($last_error);
 
     return $out;
 }
