@@ -45,7 +45,7 @@ sub edit_structure {
         print $fh map { "# $_\n" } split(/\n/, $name);
 
 
-        print Dump($structure);
+        print $fh Dump($structure);
         close $fh;
 
         my $ed = find_editor();
