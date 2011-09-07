@@ -7,9 +7,10 @@ use warnings;
 require Exporter;
 use File::Spec;
 use YAML::Any;
-use File::Temp;
+use File::Temp qw/ tempfile /;
 use Data::Edit::vimdiff;
 use Data::Edit::editor;
+use Cwd;
 
 our @ISA = qw(Exporter);
 
@@ -66,6 +67,14 @@ sub edit_structure {
 sub find_editor {
     my $ed = $ENV{VISUAL} || $ENV{EDITOR};
 
+    # Debian / Ubuntu magic
+    unless ($ed) {
+        $ed = "/usr/bin/editor";
+        if (-l $ed) {
+            $ed = Cwd::realpath($ed);
+        }
+    }
+
     my ($vol, $dir, $file) = File::Spec->splitdir($ed);
 
     if ($file eq 'vim') {
@@ -73,7 +82,7 @@ sub find_editor {
             return Data::Edit::vimdiff->new( path => $vimdiff );
         }
     }
-    return Data::Edit::editor( path => $ed );
+    return Data::Edit::editor->new( path => $ed );
 }
 
 # Preloaded methods go here.
