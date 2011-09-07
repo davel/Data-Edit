@@ -5,7 +5,11 @@ use strict;
 use warnings;
 
 require Exporter;
-use AutoLoader qw(AUTOLOAD);
+use File::Spec;
+use YAML::Any;
+use File::Temp;
+use Data::Edit::vimdiff;
+use Data::Edit::editor;
 
 our @ISA = qw(Exporter);
 
@@ -17,17 +21,60 @@ our @ISA = qw(Exporter);
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 our %EXPORT_TAGS = ( 'all' => [ qw(
-	
+    edit_structure
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
-our @EXPORT = qw(
-	
-);
+our @EXPORT = qw();
 
 our $VERSION = '0.01';
 
+sub edit_structure {
+    my ($structure, $name) = @_;
+
+    my $last_error;
+    my $out;
+
+    do {
+        my ($fh, $fn) = tempfile( SUFFIX => ".yml" );
+        if (defined $last_error) {
+            print $fh map { "# $_\n" } split(/\n/, $last_error);
+        }
+        print $fh map { "# $_\n" } split(/\n/, $name);
+
+
+        print Dump($structure);
+        close $fh;
+
+        my $ed = find_editor();
+        $ed->edit($fn);
+
+        local $@;
+        eval {
+            $out = Load($fn);
+        };
+        unlink($fn) or warn "Could not delete '$fn': $!";
+
+        $last_error = $@;
+
+    } while (defined $last_error);
+
+    return $out;
+}
+
+sub find_editor {
+    my $ed = $ENV{VISUAL} || $ENV{EDITOR};
+
+    my ($vol, $dir, $file) = File::Spec->splitdir($ed);
+
+    if ($file eq 'vim') {
+        if (-x (my $vimdiff = File::Spec->catpath($vol, $dir, $file))) {
+            return Data::Edit::vimdiff->new( path => $vimdiff );
+        }
+    }
+    return Data::Edit::editor( path => $ed );
+}
 
 # Preloaded methods go here.
 
@@ -73,7 +120,7 @@ If you have a web site set up for your module, mention it here.
 
 =head1 AUTHOR
 
-Dave Lambley, E<lt>davel@E<gt>
+Dave Lambley, E<lt>davel@state51.co.ukE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
