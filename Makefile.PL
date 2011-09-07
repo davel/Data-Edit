@@ -5,8 +5,23 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME              => 'Data::Edit',
     VERSION_FROM      => 'lib/Data/Edit.pm', # finds $VERSION
-    PREREQ_PM         => {}, # e.g., Module::Name => 1.1
+    PREREQ_PM         => {
+        'Cwd' => 0,
+        'File::Temp' => 0,
+        'Moose' => 0,
+        'MooseX::Types::Moose' => 0,
+        'File::Spec' => 0,
+        'YAML::Any' => 0,
+    },
+    BUILD_REQUIRES => {
+    },
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/Data/Edit.pm', # retrieve abstract from module
        AUTHOR         => 'Dave Lambley <davel@state51.co.uk>') : ()),
+    META_MERGE => {
+        resources => {
+#            repository => "http://github.com/davel/Linux-PipeMagic",
+        },
+    },
+    LICENSE           => "perl",
 );
