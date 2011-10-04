@@ -5,13 +5,9 @@ use File::Temp qw/ tempfile /;
 with qw/ Data::Edit::Role::Editor /;
 
 sub edit {
-    my ($self, $file) = @_;
-    my (undef, $fn) = tempfile( SUFFIX => ".yml");
-    system("cp", "--", $file, $fn) == 0 or die "cannot copy!";
+    my ($self, $file, $orig) = @_;
 
-    chmod 0400, $fn;
-    system($self->path, $fn, $file) or die "editor failed";
-    unlink($fn) or warn "Could not remove '$fn': $!";
+    system($self->path, $orig, $file)==0 or die "editor failed";
     return;
 }
 

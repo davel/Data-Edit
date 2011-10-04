@@ -37,31 +37,58 @@ sub edit_structure {
     my $last_error;
     my $out;
 
+    my $header_lines=5;
+
+    my @offer_to_edit = map { "$_\n" } split(/\n/, Dump($structure));
+
     do {
-        my ($fh, $fn) = tempfile( SUFFIX => ".yml" );
-        if (defined $last_error) {
-            print $fh "# The previous error was:\n";
-            print $fh map { "# $_\n" } split(/\n/, $last_error);
+        my @header_block = map { "## $_\n" } split(/\n/, $name || "");
+        if ($last_error) {
+            push @header_block, "## The previous error was:\n";
+            push @header_block, map { "## $_\n" } split(/\n/, $last_error);
         }
-        print $fh map { "# $_\n" } split(/\n/, $name);
 
+        push @header_block, "##\n" while scalar(@header_block)<$header_lines;
 
-        print $fh Dump($structure);
-        close $fh;
+        if (scalar(@header_block)>$header_lines) {
+            # Which cunningly extends the next header block by one line.
+            push @header_block, "## Error too long, line numbers will be wrong.\n";
+        }
+
+        my ($orig_fh, $orig_fn) = tempfile( SUFFIX => ".yml" );
+        print $orig_fh map { "##\n" } @header_block;
+        print $orig_fh Dump($structure);
+        close $orig_fh;
+
+        chmod 0400, $orig_fn;
+
+        my ($edit_fh, $edit_fn) = tempfile( SUFFIX => ".yml" );
+        print $edit_fh @header_block;
+
+        # XXX assumes only header lines at start
+        print $edit_fh grep { $_!~ /^##/ } @offer_to_edit;
+        close $edit_fh;
 
         my $ed = find_editor();
-        $ed->edit($fn);
+        $ed->edit($edit_fn, $orig_fn);
 
-        open($fh, "<", $fn) or die $!;
+        open(my $fh, "<", $edit_fn) or die $!;
+        @offer_to_edit = <$fh>;
+
+        # XXX assumes only header lines at start
+        $header_lines = scalar(grep { /^##/ } @offer_to_edit);
 
         local $@;
         eval {
-            $out = Load(join("", <$fh>));
+            $out = Load(join("", @offer_to_edit));
         };
         $last_error = $@;
 
+        warn "Got error: $last_error";
+
         close $fh;
-        unlink($fn) or warn "Could not delete '$fn': $!";
+        unlink($orig_fn) or warn "Could not delete '$orig_fn': $!";
+        unlink($edit_fn) or warn "Could not delete '$edit_fn': $!";
 
 
     } while ($last_error);
@@ -80,10 +107,12 @@ sub find_editor {
         }
     }
 
-    my ($vol, $dir, $file) = File::Spec->splitdir($ed);
+    my ($vol, $dir, $file) = File::Spec->splitpath($ed);
+
+    print "file is $file\n";
 
     if ($file eq 'vim') {
-        if (-x (my $vimdiff = File::Spec->catpath($vol, $dir, $file))) {
+        if (-x (my $vimdiff = File::Spec->catpath($vol, $dir, 'vimdiff'))) {
             return Data::Edit::vimdiff->new( path => $vimdiff );
         }
     }
