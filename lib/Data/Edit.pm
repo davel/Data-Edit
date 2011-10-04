@@ -107,8 +107,6 @@ sub find_editor {
 
     my ($vol, $dir, $file) = File::Spec->splitpath($ed);
 
-    print "file is $file\n";
-
     if ($file eq 'vim') {
         if (-x (my $vimdiff = File::Spec->catpath($vol, $dir, 'vimdiff'))) {
             return Data::Edit::vimdiff->new( path => $vimdiff );
