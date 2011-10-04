@@ -84,8 +84,6 @@ sub edit_structure {
         };
         $last_error = $@;
 
-        warn "Got error: $last_error";
-
         close $fh;
         unlink($orig_fn) or warn "Could not delete '$orig_fn': $!";
         unlink($edit_fn) or warn "Could not delete '$edit_fn': $!";
