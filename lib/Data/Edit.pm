@@ -125,37 +125,48 @@ __END__
 
 =head1 NAME
 
-Data::Edit - Perl extension for blah blah blah
+Data::Edit - Perl wrapper around your text editor
 
 =head1 SYNOPSIS
 
   use Data::Edit;
-  blah blah blah
+  my $structure = { ... };
+  Data::Edit::edit_structure($structure, "my structure");
 
 =head1 DESCRIPTION
 
-Stub documentation for Data::Edit, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
+The module is a wrapper around a YAML parser and your text editor, for the
+purpose of editing a data structure in memory.  Special magic is added for vim
+users to allow them to see the changes they are making in C<vimdiff>.
 
 =head2 EXPORT
 
-None by default.
+=over
 
+=item edit_structure
 
+May be exported
+
+=back
+
+=head1 ENVIRONMENT
+
+C<VISUAL> and C<EDITOR> are looked at to determine the text editor to use.  If
+these aren't defined, it checks for a symlink at /usr/bin/editor.
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
+=over
 
-If you have a mailing list set up for your module, mention it here.
+=item *
 
-If you have a web site set up for your module, mention it here.
+L<YAML>
+
+=item *
+
+L<vimdiff>
+
+=back
 
 =head1 AUTHOR
 
