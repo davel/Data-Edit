@@ -11,6 +11,7 @@ use File::Temp qw/ tempfile /;
 use Data::Edit::vimdiff;
 use Data::Edit::editor;
 use Cwd;
+use Try::Tiny;
 
 our @ISA = qw(Exporter);
 
@@ -78,11 +79,13 @@ sub edit_structure {
         # XXX assumes only header lines at start
         $header_lines = scalar(grep { /^##/ } @offer_to_edit);
 
-        local $@;
-        eval {
+        $last_error = undef;
+        try {
             $out = Load(join("", @offer_to_edit));
+        }
+        catch {
+            $last_error = $_;
         };
-        $last_error = $@;
 
         close $fh;
         unlink($orig_fn) or warn "Could not delete '$orig_fn': $!";

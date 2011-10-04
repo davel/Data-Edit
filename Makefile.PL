@@ -12,6 +12,7 @@ WriteMakefile(
         'MooseX::Types::Moose' => 0,
         'File::Spec' => 0,
         'YAML::Any' => 0,
+        'Try::Tiny' => 0,
     },
     BUILD_REQUIRES => {
     },
