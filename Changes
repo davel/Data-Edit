@@ -1,6 +1,5 @@
 Revision history for Perl extension Data::Edit.
 
-0.01  Tue Sep  6 09:12:40 2011
-	- original version; created by h2xs 1.23 with options
-		-X Data::Edit
+0.01  Thur Oct 13 2011 23:29:00
+	- Original release.
 
