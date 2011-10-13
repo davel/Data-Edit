@@ -21,7 +21,7 @@ WriteMakefile(
        AUTHOR         => 'Dave Lambley <davel@state51.co.uk>') : ()),
     META_MERGE => {
         resources => {
-#            repository => "http://github.com/davel/Linux-PipeMagic",
+            repository => "http://github.com/davel/Data-Edit",
         },
     },
     LICENSE           => "perl",
